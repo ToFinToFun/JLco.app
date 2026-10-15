@@ -1,0 +1,178 @@
+---
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  siteKey: string;
+  /** Result of a no-JavaScript submit, from the ?status= query parameter. */
+  status: string | null;
+}
+
+const { lang, siteKey, status } = Astro.props;
+const t = useTranslations(lang);
+
+const messages = {
+  invalid: t('contact.invalid'),
+  captcha: t('contact.captcha'),
+  rate: t('contact.rate'),
+  error: t('contact.error'),
+};
+const sent = status === 'sent';
+const errorText = status && status in messages ? messages[status as keyof typeof messages] : '';
+---
+<div class="contact-form" data-messages={JSON.stringify(messages)} data-sending={t('contact.sending')}>
+  <form method="post" action="/api/contact" hidden={sent} novalidate>
+    <input type="hidden" name="lang" value={lang} />
+    <div class="row">
+      <label>
+        <span>{t('contact.name')}</span>
+        <input type="text" name="name" autocomplete="name" required maxlength="200" />
+      </label>
+      <label>
+        <span>{t('contact.email')}</span>
+        <input type="email" name="email" autocomplete="email" required maxlength="320" />
+      </label>
+    </div>
+    <label>
+      <span>{t('contact.message')}</span>
+      <textarea name="message" rows="7" required maxlength="5000"></textarea>
+    </label>
+    <div class="hp" aria-hidden="true">
+      <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+    </div>
+    {siteKey && <div class="cf-turnstile" data-sitekey={siteKey} data-theme="dark" data-language={lang}></div>}
+    <p class="error" role="alert">{errorText}</p>
+    <div class="actions">
+      <button type="submit" class="button">
+        <span class="label">{t('contact.send')}</span> <span aria-hidden="true">→</span>
+      </button>
+    </div>
+  </form>
+
+  <div class="done" role="status" hidden={!sent}>
+    <p class="eyebrow">{t('contact.sentTitle')}</p>
+    <p class="done-text">{t('contact.sent')}</p>
+    <button type="button" class="again">{t('contact.again')}</button>
+  </div>
+</div>
+
+<script>
+  type TurnstileApi = { reset: (el?: Element) => void };
+
+  for (const root of document.querySelectorAll<HTMLElement>('.contact-form')) {
+    const form = root.querySelector('form')!;
+    const done = root.querySelector<HTMLElement>('.done')!;
+    const error = root.querySelector<HTMLElement>('.error')!;
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const label = button.querySelector<HTMLElement>('.label')!;
+    const messages = JSON.parse(root.dataset.messages ?? '{}') as Record<string, string>;
+    const sendText = label.textContent ?? '';
+
+    const resetCaptcha = () => {
+      const turnstile = (window as unknown as { turnstile?: TurnstileApi }).turnstile;
+      const widget = form.querySelector('.cf-turnstile');
+      if (turnstile && widget) turnstile.reset(widget);
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      error.textContent = '';
+      if (!form.checkValidity()) {
+        error.textContent = messages.invalid;
+        form.reportValidity();
+        return;
+      }
+      button.disabled = true;
+      label.textContent = root.dataset.sending ?? sendText;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+        const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+        if (res.ok && data.ok) {
+          form.reset();
+          form.hidden = true;
+          done.hidden = false;
+          done.querySelector('button')?.focus();
+        } else {
+          error.textContent = messages[data.error ?? 'error'] ?? messages.error;
+        }
+      } catch {
+        error.textContent = messages.error;
+      } finally {
+        button.disabled = false;
+        label.textContent = sendText;
+        resetCaptcha();
+      }
+    });
+
+    done.querySelector('.again')?.addEventListener('click', () => {
+      done.hidden = true;
+      form.hidden = false;
+      form.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
+      if (location.search) history.replaceState(null, '', location.pathname);
+    });
+  }
+</script>
+
+<style>
+  form { display: flex; flex-direction: column; gap: 24px; }
+  form[hidden], .done[hidden] { display: none; }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+  }
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  label > span {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  input, textarea {
+    font: inherit;
+    font-size: 16px;
+    color: var(--bone);
+    background: var(--ink-2);
+    border: 1px solid var(--line-2);
+    border-radius: 0;
+  }
+  input { min-height: 52px; padding: 0 16px; }
+  textarea { padding: 14px 16px; line-height: 1.5; resize: vertical; min-height: 160px; }
+  input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-color: transparent; }
+  .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .error { margin: 0; min-height: 1.4em; color: #f0a07a; font-size: 15px; }
+  .error:empty { display: none; }
+  .actions { display: flex; justify-content: flex-end; }
+  .done {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 40px;
+    border: 1px solid var(--line-2);
+    background: var(--ink-2);
+  }
+  .done p { margin: 0; }
+  .done-text { font-size: 24px; font-weight: 700; font-stretch: 112%; }
+  .again {
+    align-self: flex-start;
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-decoration: underline;
+  }
+  .again:hover { color: var(--accent); }
+</style>
