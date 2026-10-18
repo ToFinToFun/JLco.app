@@ -43,7 +43,7 @@ git checkout production && git merge --ff-only main && git push origin productio
 ## Deploy with Coolify
 
 1. In Coolify: **New resource → Public/Private repository → this repo**, branch `production`, build pack **Dockerfile**.
-2. Port: `4321`. Domains: `https://jlco.app` (and `https://www.jlco.app` if used).
+2. Port (Ports Exposes): `4321`. If Coolify sets a `PORT` variable, it must be the same number. Domains: `https://jlco.app` (and `https://www.jlco.app` if used).
 3. Environment variables (runtime, not build):
 
    | Variable | Example |
