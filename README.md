@@ -30,9 +30,19 @@ npx -p sharp node brand/generate-assets.mjs brand/JLco_transparent_4096px.png /t
 # then copy the files into public/brand/ (logo, mark, og-image) and public/ (favicon, icons)
 ```
 
+## Branches and releases
+
+Work happens on `main`. Coolify deploys the `production` branch, so a release is bringing `production` up to date with `main`:
+
+```sh
+git checkout production && git merge --ff-only main && git push origin production
+```
+
+(or open a pull request from `main` into `production` on GitHub and merge it).
+
 ## Deploy with Coolify
 
-1. In Coolify: **New resource → Public/Private repository → this repo**, branch `main`, build pack **Dockerfile**.
+1. In Coolify: **New resource → Public/Private repository → this repo**, branch `production`, build pack **Dockerfile**.
 2. Port: `4321`. Domains: `https://jlco.app` (and `https://www.jlco.app` if used).
 3. Environment variables (runtime, not build):
 
@@ -48,7 +58,7 @@ npx -p sharp node brand/generate-assets.mjs brand/JLco_transparent_4096px.png /t
    | `TURNSTILE_SITE_KEY` | from Cloudflare → Turnstile |
    | `TURNSTILE_SECRET_KEY` | from Cloudflare → Turnstile |
 
-4. Enable auto deploy so every push to `main` redeploys.
+4. Enable auto deploy so every push to `production` redeploys.
 5. Cloudflare DNS: an `A` record for `jlco.app` (and `www`) pointing to the VPS. With the orange-cloud proxy on, set SSL/TLS mode to **Full (strict)**.
 
 The recipient address only exists in `CONTACT_TO` on the server and is never sent to the browser.
