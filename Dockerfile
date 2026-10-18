@@ -16,6 +16,7 @@ COPY --from=build /app/dist ./dist
 COPY package.json ./
 USER node
 EXPOSE 4321
+# Use $PORT so the check follows the port the platform actually starts the app on.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:4321/ > /dev/null || exit 1
+  CMD wget -qO- "http://127.0.0.1:${PORT:-4321}/" > /dev/null || exit 1
 CMD ["node", "./dist/server/entry.mjs"]
