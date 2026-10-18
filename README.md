@@ -19,13 +19,30 @@ Without `TURNSTILE_SECRET_KEY` the captcha check is skipped, which is handy loca
 English is the default. Swedish texts are already in `src/i18n/ui.ts`.
 To publish Swedish (`/sv/`, `/sv/contact`) and show the EN / SV switcher, add `'sv'` to `enabledLangs` in that file.
 
-## Logo
+## Logo and brand
 
-`src/components/Logo.astro` holds a placeholder wordmark, and `public/favicon.svg` a placeholder icon. Replace both with the final logo.
+The logo and graphic profile live in `brand/`. Web versions are in `public/brand/` and the icons in `public/`; `src/components/Logo.astro` shows the full logo (with "co") in the hero and the mark alone in the header, since the profile sets 120 px as the minimum width with "co". The colour palette from the profile is defined at the top of `src/styles/global.css`.
+
+To regenerate the web images after a logo change:
+
+```sh
+npx -p sharp node brand/generate-assets.mjs brand/JLco_transparent_4096px.png /tmp/jlco-brand
+# then copy the files into public/brand/ (logo, mark, og-image) and public/ (favicon, icons)
+```
+
+## Branches and releases
+
+Work happens on `main`. Coolify deploys the `production` branch, so a release is bringing `production` up to date with `main`:
+
+```sh
+git checkout production && git merge --ff-only main && git push origin production
+```
+
+(or open a pull request from `main` into `production` on GitHub and merge it).
 
 ## Deploy with Coolify
 
-1. In Coolify: **New resource → Public/Private repository → this repo**, branch `main`, build pack **Dockerfile**.
+1. In Coolify: **New resource → Public/Private repository → this repo**, branch `production`, build pack **Dockerfile**.
 2. Port: `4321`. Domains: `https://jlco.app` (and `https://www.jlco.app` if used).
 3. Environment variables (runtime, not build):
 
@@ -41,7 +58,7 @@ To publish Swedish (`/sv/`, `/sv/contact`) and show the EN / SV switcher, add `'
    | `TURNSTILE_SITE_KEY` | from Cloudflare → Turnstile |
    | `TURNSTILE_SECRET_KEY` | from Cloudflare → Turnstile |
 
-4. Enable auto deploy so every push to `main` redeploys.
+4. Enable auto deploy so every push to `production` redeploys.
 5. Cloudflare DNS: an `A` record for `jlco.app` (and `www`) pointing to the VPS. With the orange-cloud proxy on, set SSL/TLS mode to **Full (strict)**.
 
 The recipient address only exists in `CONTACT_TO` on the server and is never sent to the browser.

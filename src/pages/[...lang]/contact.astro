@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import { defaultLang, enabledLangs, isLang, useTranslations, type Lang } from '../../i18n/ui';
+
+// Rendered on the server so the Turnstile site key is read at runtime.
+export const prerender = false;
+
+const param = Astro.params.lang;
+const lang: Lang | null = param === undefined ? defaultLang : isLang(param) && param !== defaultLang ? param : null;
+if (!lang || !enabledLangs.includes(lang)) {
+  return new Response('Not found', { status: 404 });
+}
+
+const t = useTranslations(lang);
+const status = Astro.url.searchParams.get('status');
+const siteKey = process.env.TURNSTILE_SITE_KEY ?? '';
+---
+<Base lang={lang} path="/contact" title={t('contact.title')} showContactLink={false}>
+  {siteKey && (
+    <script slot="head" is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  )}
+  <section class="contact">
+    <div class="intro">
+      <p class="eyebrow">{t('contact.eyebrow')}</p>
+      <h1 class="display">{t('contact.heading')}</h1>
+      <p class="lead">{t('contact.lead')}</p>
+    </div>
+    <div class="form-wrap">
+      <ContactForm lang={lang} siteKey={siteKey} status={status} />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contact {
+    flex-grow: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 64px;
+    padding: 48px 0 80px;
+    align-items: flex-start;
+  }
+  .intro {
+    flex: 1 1 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .intro p { margin: 0; }
+  h1 { font-size: clamp(40px, 5vw, 72px); line-height: 1; }
+  .lead { max-width: 420px; font-size: 18px; line-height: 1.6; color: var(--muted); }
+  .form-wrap { flex: 1 1 480px; max-width: 640px; }
+</style>
