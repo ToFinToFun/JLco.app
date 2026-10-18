@@ -19,9 +19,16 @@ Without `TURNSTILE_SECRET_KEY` the captcha check is skipped, which is handy loca
 English is the default. Swedish texts are already in `src/i18n/ui.ts`.
 To publish Swedish (`/sv/`, `/sv/contact`) and show the EN / SV switcher, add `'sv'` to `enabledLangs` in that file.
 
-## Logo
+## Logo and brand
 
-`src/components/Logo.astro` holds a placeholder wordmark, and `public/favicon.svg` a placeholder icon. Replace both with the final logo.
+The logo and graphic profile live in `brand/`. Web versions are in `public/brand/` and the icons in `public/`; `src/components/Logo.astro` shows the full logo (with "co") in the hero and the mark alone in the header, since the profile sets 120 px as the minimum width with "co". The colour palette from the profile is defined at the top of `src/styles/global.css`.
+
+To regenerate the web images after a logo change:
+
+```sh
+npx -p sharp node brand/generate-assets.mjs brand/JLco_transparent_4096px.png /tmp/jlco-brand
+# then copy the files into public/brand/ (logo, mark, og-image) and public/ (favicon, icons)
+```
 
 ## Deploy with Coolify
 

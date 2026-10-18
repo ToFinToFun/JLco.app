@@ -3,14 +3,23 @@
 @import '@fontsource/jetbrains-mono/500.css';
 
 :root {
-  --ink: #0b0c0d;
-  --ink-2: #141618;
-  --line: #24262a;
-  --line-2: #2e3136;
-  --bone: #e9e6df;
-  --muted: #a8a49c;
-  --faint: #8a877f;
-  --accent: #d08c5b;
+  /* Brand palette from brand/JLco_grafisk_profil.pdf */
+  --cyan: #00e3f2;
+  --blue: #008bff;
+  --royal: #0732c8;
+  --navy: #123b70;
+  --midnight: #07192d;
+  --black: #000000;
+
+  --ink: var(--black);
+  --ink-2: #050f1c;
+  --line: #0f2238;
+  --line-2: #17365c;
+  --bone: #eaf0f7;
+  --muted: #a3b3c6;
+  --faint: #7489a1;
+  --accent: var(--blue);
+  --accent-2: var(--cyan);
 
   --font-sans: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -33,9 +42,9 @@ body {
 }
 
 a { color: var(--bone); }
-a:hover { color: var(--accent); }
+a:hover { color: var(--accent-2); }
 
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
 
 .mono {
   font-family: var(--font-mono);
@@ -48,7 +57,7 @@ a:hover { color: var(--accent); }
   font-size: 13px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--accent-2);
 }
 
 .display {
@@ -66,8 +75,8 @@ a:hover { color: var(--accent); }
   min-height: 52px;
   padding: 0 28px;
   border: 0;
-  background: var(--accent);
-  color: var(--ink);
+  background: linear-gradient(120deg, var(--cyan), var(--blue) 70%);
+  color: var(--black);
   text-decoration: none;
   cursor: pointer;
   font-family: var(--font-mono);
@@ -75,9 +84,9 @@ a:hover { color: var(--accent); }
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  transition: background-color 0.15s ease;
+  transition: filter 0.15s ease;
 }
-.button:hover { color: var(--ink); background: #dc9d70; }
+.button:hover { color: var(--black); filter: brightness(1.12); }
 .button[disabled] { opacity: 0.6; cursor: progress; }
 
 .sr-only {

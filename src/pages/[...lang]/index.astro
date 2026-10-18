@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import Logo from '../../components/Logo.astro';
 import { langPaths, localePath, useTranslations, type Lang } from '../../i18n/ui';
 
 export const getStaticPaths = langPaths;
@@ -9,13 +10,18 @@ const t = useTranslations(lang);
 ---
 <Base lang={lang} path="/" showContactLink={true}>
   <section class="hero">
-    <p class="eyebrow">{t('home.eyebrow')}</p>
-    <h1 class="display">{t('home.title')}</h1>
-    <p class="lead">{t('home.lead')}</p>
-    <div>
-      <a class="button" href={localePath(lang, '/contact')}>
-        {t('home.cta')} <span aria-hidden="true">→</span>
-      </a>
+    <div class="copy">
+      <p class="eyebrow">{t('home.eyebrow')}</p>
+      <h1 class="display">{t('home.title')}</h1>
+      <p class="lead">{t('home.lead')}</p>
+      <div>
+        <a class="button" href={localePath(lang, '/contact')}>
+          {t('home.cta')} <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+    <div class="mark" aria-hidden="true">
+      <Logo variant="full" height={400} class="mark-img" eager />
     </div>
   </section>
 </Base>
@@ -24,15 +30,22 @@ const t = useTranslations(lang);
   .hero {
     flex-grow: 1;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 36px;
-    max-width: 1100px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 48px 64px;
     padding: 48px 0 72px;
   }
-  .hero p { margin: 0; }
+  .copy {
+    flex: 1 1 440px;
+    max-width: 780px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+  .copy p { margin: 0; }
   h1 {
-    font-size: clamp(44px, 7.4vw, 112px);
+    font-size: clamp(44px, 6.4vw, 104px);
     line-height: 0.95;
   }
   .lead {
@@ -40,5 +53,30 @@ const t = useTranslations(lang);
     font-size: clamp(17px, 1.4vw, 19px);
     line-height: 1.55;
     color: var(--muted);
+  }
+  .mark {
+    flex: 1 1 340px;
+    max-width: 460px;
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+  .mark::before {
+    content: '';
+    position: absolute;
+    inset: -10% -10%;
+    background: radial-gradient(closest-side, rgba(0, 139, 255, 0.22), rgba(7, 50, 200, 0.08) 60%, transparent);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+  .mark :global(.mark-img) {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    height: auto;
+  }
+  /* On phones the header mark is enough. */
+  @media (max-width: 720px) {
+    .mark { display: none; }
   }
 </style>

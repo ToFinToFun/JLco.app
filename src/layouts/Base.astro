@@ -27,12 +27,17 @@ const year = new Date().getFullYear();
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#0b0c0d" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#000000" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/brand/og-image.png', Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     {enabledLangs.length > 1 &&
       enabledLangs.map((l) => (
         <link rel="alternate" hreflang={l} href={new URL(localePath(l, path), Astro.site)} />
@@ -44,7 +49,7 @@ const year = new Date().getFullYear();
     <div class="page">
       <header class="site-header">
         <a href={localePath(lang, '/')} class="home-link" aria-label={t('nav.home')}>
-          <Logo />
+          <Logo height={44} eager />
         </a>
         <nav class="site-nav mono">
           {showContactLink && <a href={localePath(lang, '/contact')}>{t('nav.contact')}</a>}
@@ -87,8 +92,8 @@ const year = new Date().getFullYear();
     inset: 0;
     pointer-events: none;
     background-image:
-      linear-gradient(rgba(233, 230, 223, 0.045) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(233, 230, 223, 0.045) 1px, transparent 1px);
+      linear-gradient(rgba(0, 139, 255, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 139, 255, 0.07) 1px, transparent 1px);
     background-size: 64px 64px;
     mask-image: radial-gradient(ellipse at 30% 40%, #000 30%, transparent 85%);
   }
@@ -96,6 +101,7 @@ const year = new Date().getFullYear();
     position: relative;
     min-height: 100vh;
     min-height: 100dvh;
+    overflow-x: clip;
     display: flex;
     flex-direction: column;
     padding: 0 var(--gutter);
@@ -118,8 +124,8 @@ const year = new Date().getFullYear();
   .site-nav a { text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
   .langs { display: inline-flex; gap: 6px; align-items: center; }
   .langs a:not([aria-current]) { color: var(--faint); }
-  .langs a:hover { color: var(--accent); }
-  .sep { color: #6f6c66; }
+  .langs a:hover { color: var(--accent-2); }
+  .sep { color: var(--line-2); }
   .site-main { flex-grow: 1; display: flex; flex-direction: column; }
   .site-footer {
     display: flex;

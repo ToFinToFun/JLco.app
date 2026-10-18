@@ -1,19 +1,32 @@
 ---
-// Placeholder wordmark. Replace the markup below with the final logo
-// (inline SVG works best) when the brand profile is ready.
+// JLco logo from the graphic profile (brand/). The full logo includes "co";
+// below 120 px wide the profile asks for the mark alone.
 interface Props {
-  size?: number;
+  variant?: 'mark' | 'full';
+  /** Rendered height in px. */
+  height?: number;
+  class?: string;
+  eager?: boolean;
 }
-const { size = 22 } = Astro.props;
----
-<span class="logo" style={`font-size: ${size}px`}>JL<span class="light">co</span></span>
 
-<style>
-  .logo {
-    font-weight: 800;
-    font-stretch: 125%;
-    letter-spacing: 0.02em;
-    line-height: 1;
-  }
-  .light { font-weight: 300; }
-</style>
+const { variant = 'mark', height = 40, class: className, eager = false } = Astro.props;
+// Source images are 3584 x 3181.
+const width = Math.round((height * 3584) / 3181);
+const src = variant === 'full' ? '/brand/jlco-logo-640.webp' : '/brand/jlco-mark-96.webp';
+const srcset =
+  variant === 'full'
+    ? '/brand/jlco-logo-640.webp 640w, /brand/jlco-logo-1280.webp 1280w'
+    : '/brand/jlco-mark-96.webp 96w, /brand/jlco-mark-192.webp 192w';
+---
+<img
+  class={className}
+  src={src}
+  srcset={srcset}
+  sizes={`${width}px`}
+  width={width}
+  height={height}
+  alt="JLco"
+  decoding="async"
+  loading={eager ? 'eager' : 'lazy'}
+  fetchpriority={eager ? 'high' : undefined}
+/>

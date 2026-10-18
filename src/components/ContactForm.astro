@@ -147,9 +147,9 @@ const errorText = status && status in messages ? messages[status as keyof typeof
   }
   input { min-height: 52px; padding: 0 16px; }
   textarea { padding: 14px 16px; line-height: 1.5; resize: vertical; min-height: 160px; }
-  input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-color: transparent; }
+  input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; border-color: transparent; }
   .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
-  .error { margin: 0; min-height: 1.4em; color: #f0a07a; font-size: 15px; }
+  .error { margin: 0; min-height: 1.4em; color: #ff9b8a; font-size: 15px; }
   .error:empty { display: none; }
   .actions { display: flex; justify-content: flex-end; }
   .done {
@@ -174,5 +174,5 @@ const errorText = status && status in messages ? messages[status as keyof typeof
     font-size: 13px;
     text-decoration: underline;
   }
-  .again:hover { color: var(--accent); }
+  .again:hover { color: var(--accent-2); }
 </style>
