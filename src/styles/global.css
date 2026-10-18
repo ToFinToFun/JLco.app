@@ -1,6 +1,5 @@
 /* Latin subsets only (covers English and Swedish); keeps the inlined CSS small. */
 @import '@fontsource/jetbrains-mono/latin-400.css';
-@import '@fontsource/jetbrains-mono/latin-500.css';
 
 @font-face {
   font-family: 'Archivo Variable';
@@ -91,7 +90,7 @@ a:hover { color: var(--accent-2); }
   cursor: pointer;
   font-family: var(--font-mono);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   transition: filter 0.15s ease;
