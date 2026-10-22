@@ -14,6 +14,8 @@ export default defineConfig({
     allowedDomains: [
       { hostname: 'jlco.app', protocol: 'https' },
       { hostname: 'www.jlco.app', protocol: 'https' },
+      { hostname: 'jlco.se', protocol: 'https' },
+      { hostname: 'www.jlco.se', protocol: 'https' },
     ],
   },
   i18n: {
