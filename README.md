@@ -43,23 +43,23 @@ git checkout production && git merge --ff-only main && git push origin productio
 ## Deploy with Coolify
 
 1. In Coolify: **New resource → Public/Private repository → this repo**, branch `production`, build pack **Dockerfile**.
-2. Port (Ports Exposes): `4321`. If Coolify sets a `PORT` variable, it must be the same number. Domains: `https://jlco.app` (and `https://www.jlco.app` if used).
+2. Port (Ports Exposes): `4321`. If Coolify sets a `PORT` variable, it must be the same number. Domains: `https://jlco.app,https://jlco.se` (plus the `www.` variants if used). Every domain must also be listed in `security.allowedDomains` in `astro.config.mjs`.
 3. Environment variables (runtime, not build):
 
    | Variable | Example |
    | --- | --- |
-   | `SMTP_HOST` | `mail.jlco.app` (or the mail container's hostname on the same VPS) |
+   | `SMTP_HOST` | `mail.paasovaara.se` |
    | `SMTP_PORT` | `587` |
    | `SMTP_SECURE` | `false` for 587, `true` for 465 |
-   | `SMTP_USER` | `noreply@jlco.app` |
+   | `SMTP_USER` | `noreply@jlco.se` |
    | `SMTP_PASS` | the sender account's password |
-   | `SMTP_FROM` | `JLco website <noreply@jlco.app>` |
+   | `SMTP_FROM` | `JLco website <noreply@jlco.se>` |
    | `CONTACT_TO` | the inbox that should receive messages |
    | `TURNSTILE_SITE_KEY` | from Cloudflare → Turnstile |
    | `TURNSTILE_SECRET_KEY` | from Cloudflare → Turnstile |
 
 4. Enable auto deploy so every push to `production` redeploys.
-5. Cloudflare DNS: an `A` record for `jlco.app` (and `www`) pointing to the VPS. With the orange-cloud proxy on, set SSL/TLS mode to **Full (strict)**.
+5. Cloudflare DNS: an `A` record for `jlco.app` and `jlco.se` (and `www`) pointing to the VPS. With the orange-cloud proxy on, set SSL/TLS mode to **Full (strict)**.
 
 The recipient address only exists in `CONTACT_TO` on the server and is never sent to the browser.
 
