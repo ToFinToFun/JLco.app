@@ -35,7 +35,7 @@ export async function sendContactMail(msg: ContactMessage): Promise<void> {
     from,
     to: required('CONTACT_TO'),
     replyTo: { name: msg.name, address: msg.email },
-    subject: `JLco.app: message from ${msg.name}`,
+    subject: `JLco: message from ${msg.name}`,
     text: [
       `Name: ${msg.name}`,
       `Email: ${msg.email}`,
