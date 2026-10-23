@@ -1,3 +1,4 @@
+import { emailLogoPng } from './email-logo';
 import nodemailer, { type Transporter } from 'nodemailer';
 
 let transporter: Transporter | undefined;
@@ -32,34 +33,84 @@ export interface ContactMessage {
 const escape = (value: string) =>
   value.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-// The visitor sees this subject (as "Re: …") when we reply, so it is written for them.
-const subjects: Record<string, string> = { en: 'Your message to JLco', sv: 'Ditt meddelande till JLco' };
-const wrote: Record<string, string> = { en: 'wrote', sv: 'skrev' };
+const languageNames: Record<string, string> = { en: 'Engelska', sv: 'Svenska' };
 
-/**
- * Kept plain on purpose: a reply quotes the whole mail back to the visitor, so it holds only
- * their own words. Language and IP travel as headers instead (visible under "show original").
- */
-function renderHtml(msg: ContactMessage): string {
+interface Details {
+  sentAt: string;
+  language: string;
+  ip: string;
+}
+
+function renderHtml(msg: ContactMessage, d: Details): string {
   const font = "-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+  const mono = "'JetBrains Mono',Menlo,Consolas,monospace";
+  const email = escape(msg.email);
+  const row = (label: string, value: string) =>
+    `<tr><td style="padding:5px 20px 5px 0;font-family:${mono};font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#7489a1;white-space:nowrap;vertical-align:top">${label}</td>` +
+    `<td style="padding:5px 0;font-size:14px;color:#07192d">${value}</td></tr>`;
+
   return `<!doctype html>
-<html><body style="margin:0;padding:16px;font-family:${font};color:#07192d">
-<p style="margin:0 0 12px;font-size:14px;color:#5a6b7f">${escape(msg.name)} &lt;${escape(msg.email)}&gt; ${wrote[msg.lang] ?? wrote.en}:</p>
-<div style="border-left:3px solid #008bff;padding:4px 0 4px 16px;font-size:15px;line-height:1.6;white-space:pre-wrap">${escape(msg.message)}</div>
+<html lang="sv"><head><meta charset="utf-8"><meta name="color-scheme" content="light"></head>
+<body style="margin:0;padding:0;background:#eef2f7">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f7;padding:24px 12px;font-family:${font}">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:6px;overflow:hidden">
+  <tr><td style="background:#000000;padding:20px 28px;border-bottom:3px solid #008bff">
+    <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+      <td style="vertical-align:middle"><img src="cid:jlco-logo" width="56" height="50" alt="JLco" style="display:block;border:0"></td>
+      <td style="vertical-align:middle;padding-left:16px;font-family:${mono};font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#00e3f2">Kontaktformulär</td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="padding:28px 28px 4px">
+    <p style="margin:0;font-size:24px;font-weight:800;letter-spacing:-0.01em;color:#07192d">Nytt meddelande</p>
+  </td></tr>
+  <tr><td style="padding:16px 28px 4px">
+    <table role="presentation" cellpadding="0" cellspacing="0">
+      ${row('Från', escape(msg.name))}
+      ${row('E-post', `<a href="mailto:${email}" style="color:#0732c8;text-decoration:none">${email}</a>`)}
+      ${row('Tid', escape(d.sentAt))}
+      ${row('Språk', escape(d.language))}
+      ${row('IP', escape(d.ip))}
+    </table>
+  </td></tr>
+  <tr><td style="padding:20px 28px">
+    <div style="border-left:3px solid #00e3f2;background:#f5f8fc;padding:16px 20px;font-size:15px;line-height:1.6;color:#07192d;white-space:pre-wrap">${escape(msg.message)}</div>
+  </td></tr>
+  <tr><td style="padding:0 28px 28px">
+    <a href="mailto:${email}" style="display:inline-block;background:#008bff;color:#000000;font-family:${mono};font-size:13px;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;padding:12px 22px;border-radius:2px">Svara &rarr;</a>
+  </td></tr>
+</table>
+<p style="margin:16px 0 0;font-size:12px;color:#7489a1">Svara på det här mejlet så går svaret direkt till avsändaren.</p>
+</td></tr>
+</table>
 </body></html>`;
 }
 
 export async function sendContactMail(msg: ContactMessage): Promise<void> {
   const sender = process.env.SMTP_FROM || required('SMTP_USER');
-  // Show the visitor's name in the inbox, while still sending from our own address.
   const address = sender.match(/<([^>]+)>/)?.[1] ?? sender;
+  const d: Details = {
+    sentAt: new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Stockholm', dateStyle: 'long', timeStyle: 'short' }),
+    language: languageNames[msg.lang] ?? msg.lang,
+    ip: msg.ip || 'okänd',
+  };
   await getTransporter().sendMail({
-    from: { name: `${msg.name} via JLco`, address },
+    from: { name: 'Kontaktformulär JLco', address },
     to: required('CONTACT_TO'),
     replyTo: { name: msg.name, address: msg.email },
-    subject: subjects[msg.lang] ?? subjects.en,
-    headers: { 'X-JLco-Language': msg.lang, 'X-JLco-Sender-IP': msg.ip || 'unknown' },
-    text: `${msg.name} <${msg.email}> ${wrote[msg.lang] ?? wrote.en}:\n\n${msg.message}`,
-    html: renderHtml(msg),
+    subject: `Kontaktformulär JLco: ${msg.name}`,
+    text: [
+      'KONTAKTFORMULÄR JLCO',
+      '',
+      `Från:   ${msg.name}`,
+      `E-post: ${msg.email}`,
+      `Tid:    ${d.sentAt}`,
+      `Språk:  ${d.language}`,
+      `IP:     ${d.ip}`,
+      '',
+      msg.message,
+    ].join('\n'),
+    html: renderHtml(msg, d),
+    attachments: [{ filename: 'jlco.png', content: Buffer.from(emailLogoPng, 'base64'), cid: 'jlco-logo' }],
   });
 }
