@@ -1,5 +1,6 @@
 ---
 import { useTranslations, type Lang } from '../i18n/ui';
+import { formToken } from '../lib/spam';
 
 interface Props {
   lang: Lang;
@@ -23,6 +24,7 @@ const errorText = status && status in messages ? messages[status as keyof typeof
 <div class="contact-form" data-messages={JSON.stringify(messages)} data-sending={t('contact.sending')}>
   <form method="post" action="/api/contact" hidden={sent} novalidate>
     <input type="hidden" name="lang" value={lang} />
+    <input type="hidden" name="ts" value={formToken()} />
     <div class="row">
       <label>
         <span>{t('contact.name')}</span>
