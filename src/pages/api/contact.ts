@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { defaultLang, isLang, localePath } from '../../i18n/ui';
 import { sendContactMail } from '../../lib/mail';
 import { isRateLimited } from '../../lib/rate-limit';
+import { spamReason } from '../../lib/spam';
 import { verifyTurnstile } from '../../lib/turnstile';
 
 export const prerender = false;
@@ -38,7 +39,10 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   if (isLang(rawLang)) lang = rawLang;
 
   // Honeypot: bots fill every field. Pretend it worked.
-  if (field(data, 'website', 200)) return respond('sent', 200);
+  if (field(data, 'website', 200)) {
+    console.log('[contact] blocked spam: honeypot filled');
+    return respond('sent', 200);
+  }
 
   const name = field(data, 'name', 200).replace(/[\r\n]+/g, ' ');
   const email = field(data, 'email', 320);
@@ -52,6 +56,13 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     '';
 
   if (isRateLimited(ip || 'unknown')) return respond('rate', 429);
+
+  // Likely spam: drop it but answer as if it was sent, so bots learn nothing.
+  const spam = spamReason(field(data, 'ts', 200), message);
+  if (spam) {
+    console.log(`[contact] blocked spam from ${ip || 'unknown'}: ${spam}`);
+    return respond('sent', 200);
+  }
 
   const token = data.get('cf-turnstile-response');
   if (!(await verifyTurnstile(typeof token === 'string' ? token : null, ip))) {
